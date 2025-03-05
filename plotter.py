@@ -146,24 +146,39 @@ class Plotter:
         plt.show()
 
     @staticmethod
-    def plot_weekend_comparison(weekend_sales: pd.Series):
-        """Plot weekend vs weekday comparison"""
+    def plot_weekend_comparison(df: pd.DataFrame):
+        """Plot weekend vs weekday conversion rates from raw DataFrame"""
+        # Calculate conversion rates
+        weekend_stats = df.groupby('weekend')['revenue'].mean().reset_index()
+        weekend_stats['weekend'] = weekend_stats['weekend'].map({
+            True: 'Weekend',
+            False: 'Weekday'
+        })
+
+        # Create visualization
         plt.figure(figsize=(8, 5))
-        ax = sns.barplot(x=weekend_sales.index, y=weekend_sales.values)
+        ax = sns.barplot(
+            x='weekend',
+            y='revenue',
+            data=weekend_stats,
+            order=['Weekday', 'Weekend']
+        )
         plt.title('Conversion Rates: Weekend vs Weekdays')
-        plt.xlabel('Weekend')
+        plt.xlabel('')
         plt.ylabel('Conversion Rate')
         
         # Add value labels
         for p in ax.patches:
-            ax.annotate(f'{p.get_height():.2f}', 
-                        (p.get_x() + p.get_width() / 2., p.get_height()),
-                        ha='center', va='center', 
-                        xytext=(0, 5), 
-                        textcoords='offset points')
-            
+            ax.annotate(
+                f'{p.get_height():.2f}', 
+                (p.get_x() + p.get_width() / 2., p.get_height()),
+                ha='center', 
+                va='center', 
+                xytext=(0, 5), 
+                textcoords='offset points'
+            )
+        
         plt.show()
-
    
     @staticmethod
     def plot_monthly_sales(df: pd.DataFrame):
@@ -298,3 +313,27 @@ class Plotter:
         plt.xlabel('Metrics')
         plt.ylabel('Region')
         plt.show()    
+
+    @staticmethod
+    def plot_visitor_conversion(df: pd.DataFrame):
+        """Plot conversion rates from raw DataFrame"""
+        conversion_rates = df.groupby('visitor_type')['revenue'].mean()
+        
+        plt.figure(figsize=(10, 6))
+        ax = sns.barplot(
+            x=conversion_rates.index,
+            y=conversion_rates.values
+        )
+        plt.title('Conversion Rates by Visitor Type')
+        plt.ylabel('Conversion Rate')
+        plt.xlabel('Visitor Type')
+        
+        # Add percentage labels
+        for p in ax.patches:
+            ax.annotate(f'{p.get_height():.1%}', 
+                        (p.get_x() + p.get_width()/2., p.get_height()),
+                        ha='center', va='center', 
+                        xytext=(0, 5), 
+                        textcoords='offset points')
+        
+        plt.show()   
